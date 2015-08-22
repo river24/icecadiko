@@ -1,0 +1,35 @@
+RADIKO_MAIL=''
+RADIKO_PASS=''
+
+ICECAST2_PASS='icecast2'
+ICECAST2_ADDR='127.0.0.1'
+ICECAST2_PORT=8000
+ICECAST2_PATH='/radiko'
+
+TMP_DIR="${SCRIPT_DIR}/../tmp"
+
+APP_PORT=9000
+RBENV_ROOT=/home/pi/.rbenv
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+export PATH=${PATH}
+
+# ruby (rbenv)
+if [ -s $RBENV_ROOT ] ; then
+  export PATH="$RBENV_ROOT/bin:$PATH"
+  eval "$(rbenv init -)"
+else
+  exit
+fi
+
+APP_ROOT=$(cd $(dirname $0);cd ..;/bin/pwd)
+PID_FILE=${APP_ROOT}/tmp/thin.pid
+GEM_HOME=${APP_ROOT}/vendor/bundle
+
+export RBENV_ROOT=${RBENV_ROOT}
+export GEM_HOME=${GEM_HOME}
+
+export ICECAST2_ADDR=${ICECAST2_ADDR}
+export ICECAST2_PORT=${ICECAST2_PORT}
+export ICECAST2_PATH=${ICECAST2_PATH}
+
