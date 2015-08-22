@@ -227,8 +227,8 @@ if [ "${MODE}" = 'play' -a ! -z "${CHANNEL}" ]; then
     partialkey=`dd if="${KEY_FILE}" bs=1 skip=${offset} count=${length} 2> /dev/null | base64`
 
     echo "AUTHTOKEN='${authtoken}'" > "${AUTHTOKEN_FILE}"
-    CURRENT_DATE=`date +%Y%m%d%H%M%S`
-    cp "${AUTHTOKEN_FILE}" "${AUTHTOKEN_FILE}_${CURRENT_DATE}"
+    # CURRENT_DATE=`date +%Y%m%d%H%M%S`
+    # cp "${AUTHTOKEN_FILE}" "${AUTHTOKEN_FILE}_${CURRENT_DATE}"
 
     rm -f "${AUTH1_FILE}"
 
