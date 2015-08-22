@@ -1,12 +1,19 @@
 # radiko2mpd
--
+
+- radiko を MPD (Music Player Daemon) に流すプログラム．
+- Raspbian で動作確認．
 
 ## 準備
 
-### rbenvでrubyのインストール
-rbenvとruby-buildのインストールは省略．
-
+### rbenv + ruby-build + ruby 2.2.2 + bundler
+	rbenv のインストール
+	----
 	rbenv install 2.2.2
+	rbenv rehash
+	rbenv shell 2.2.2
+	rbenv exec gem update --system
+	rbenv exec gem install bundler
+	rbenv rehash
 
 ### パッケージのインストール
 	sudo aptitude install wget
@@ -16,6 +23,7 @@ rbenvとruby-buildのインストールは省略．
 	sudo aptitude install ffmpeg lame
 	sudo aptitude install vlc-nox
 	sudo aptitude install icecast2
+	sudo aptitude install mpd
 
 ## インストール
 	git clone https://github.com/river24/radiko2mpd
@@ -29,10 +37,16 @@ rbenvとruby-buildのインストールは省略．
 
 ## 放送局スキャン
 	scripts/scan.bash
+
+## プレイリストのコピー
 	sudo cp playlists/*.m3u /var/lib/mpd/playlists/
 
 ## 起動
 	scripts/start.bash
+
+### MPDで選局
+- MPD の "Saved playlist" から聴きたい放送局を選局します．
+- 認証等の都合で，10秒前後かかります．
 
 ### 自動起動
 	crontab -e
