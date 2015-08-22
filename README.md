@@ -1,6 +1,7 @@
 # radiko2mpd
 
-- radiko を MPD (Music Player Daemon) に流すプログラム．
+- MPD (Music Player Daemon) で radiko の聴取・選局を可能にするやつ．
+- rtmpdump とか ffmpeg とか vlc とか icecast2 とか sinatra とかの組み合わせ技．
 - Raspbian で動作確認．
 
 ## 準備
