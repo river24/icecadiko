@@ -35,6 +35,8 @@
 	cp scripts/config.bash.sample scripts/config.bash
 	vi scripts/config.bash
 
+- radiko のプレミアムユーザは 'RADIKO_MAIL' と 'RADIKO_PASS' を設定することで，エリアフリーでの視聴が可能になる．
+
 ## 放送局スキャン
 	scripts/scan.bash
 
