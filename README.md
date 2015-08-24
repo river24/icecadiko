@@ -30,7 +30,7 @@
 	git clone https://github.com/river24/radiko2mpd
 	cd radiko2mpd
 	rbenv local 2.2.2
-	rbenv exec bundle install
+	rbenv exec bundle install --path vendor/bundle
 
 ### 設定ファイル作成
 	cp scripts/config.bash.sample scripts/config.bash

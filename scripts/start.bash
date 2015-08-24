@@ -7,8 +7,9 @@ SCRIPT_DIR=$(cd $(dirname $0);/bin/pwd)
 PARENT_DIR=$(cd $(dirname $0);cd ..;/bin/pwd)
 
 . "${SCRIPT_DIR}/config.bash"
+# `"${SCRIPT_DIR}/radiko.bash" stop`
 
 cd ${APP_ROOT}
 
-${RBENV_ROOT}/shims/bundle exec rackup -D -s thin -P ${PID_FILE} -p ${APP_PORT} config.ru
+${RBENV_ROOT}/shims/bundle exec thin start -P ${PID_FILE} -p ${APP_PORT} -R config.ru -d
 

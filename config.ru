@@ -5,8 +5,8 @@ require 'net/http'
 require 'sinatra'
 require 'sinatra/streaming'
 
-# radiko uri
-uri = URI.parse("http://#{ENV['ICECAST2_ADDR']}:#{ENV['ICECAST2_PORT']}#{ENV['ICECAST2_PATH']}")
+# icecast2 uri
+icecast2_uri = URI.parse("http://#{ENV['ICECAST2_ADDR']}:#{ENV['ICECAST2_PORT']}#{ENV['ICECAST2_PATH']}")
 
 # radiko command
 radiko_script=::File.dirname(__FILE__) + "/scripts/radiko.bash"
@@ -36,8 +36,8 @@ end
 get "/:station" do
   target_station = params[:station].to_s
 
-  path = uri.path.dup
-  path << "?" << uri.query if uri.query
+  path = icecast2_uri.path.dup
+  path << "?" << icecast2_uri.query if icecast2_uri.query
   request_headers = request.env.select { |k, v| k.start_with?('HTTP_') }
 
   system(stop_command)
@@ -46,7 +46,7 @@ get "/:station" do
   count = 0
   while count < 10
     server = nil
-    server = Net::BufferedIO.new(TCPSocket.new(uri.host, uri.port))
+    server = Net::BufferedIO.new(TCPSocket.new(icecast2_uri.host, icecast2_uri.port))
 
     server.writeline "GET #{path} HTTP/1.0"
     server.writeline ""
@@ -70,7 +70,7 @@ get "/:station" do
   count = 0
   while count < 20
     server = nil
-    server = Net::BufferedIO.new(TCPSocket.new(uri.host, uri.port))
+    server = Net::BufferedIO.new(TCPSocket.new(icecast2_uri.host, icecast2_uri.port))
 
     server.writeline "GET #{path} HTTP/1.0"
     server.writeline ""
@@ -88,7 +88,7 @@ get "/:station" do
 
   if on_air_flag
     server = nil
-    server = Net::BufferedIO.new(TCPSocket.new(uri.host, uri.port))
+    server = Net::BufferedIO.new(TCPSocket.new(icecast2_uri.host, icecast2_uri.port))
 
     server.writeline "GET #{path} HTTP/1.0"
     request_headers.each do |k, v|
