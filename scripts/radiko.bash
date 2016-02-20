@@ -128,7 +128,6 @@ if [ "${MODE}" = 'play' -a ! -z "${CHANNEL}" ]; then
   else
     echo "Authtoken is not found"
     AUTHTOKEN_IS_VALID=0
-    exit
   fi
 
   if [ ${AUTHTOKEN_IS_VALID} -eq 0 ]; then
@@ -280,7 +279,7 @@ if [ "${MODE}" = 'play' -a ! -z "${CHANNEL}" ]; then
              -i - \
              -vn \
              -acodec libmp3lame \
-             -ab 128 \
+             -ab 128k \
              -f adts \
              /dev/stdout \
     | vlc -I dummy \
