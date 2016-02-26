@@ -13,29 +13,38 @@ fi
 TMP_DIR="${SCRIPT_DIR}/../tmp"
 PLAYLIST_DIR="${SCRIPT_DIR}/../playlists"
 
-AREA=1
+wget -q -O "${TMP_DIR}/area.js" "http://radiko.jp/area"
+AREA=`cat "${TMP_DIR}/area.js" | perl -pe 's!^.*span class="JP([0-9]{1,2})".*$!$1!g'`
+TODOFUKEN=`cat "${TMP_DIR}/area.js" | perl -pe 's!^.*>(.*) JAPAN<.*$!$1!g'`
 
-while [ "${AREA}" -le 47 ]
-do
-  wget -q -O "${TMP_DIR}/JP${AREA}.xml" "http://radiko.jp/v2/station/list/JP${AREA}.xml"
-  cat "${TMP_DIR}/JP${AREA}.xml" | grep "<feed>" | sort | uniq | sort | perl -pe 's!^.*/feed/(.*)\.xml.*$!$1!g' | while read STATION ; do echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" >> "${PLAYLIST_DIR}/RADIKO_TMP.m3u" ; done
+echo "Your IP is found in ${TODOFUKEN} by 'radiko.jp'."
 
-  AREA_ID=$(printf "%02d" $AREA)
-  TODOFUKEN=`cat "${TMP_DIR}/JP${AREA}.xml" | grep "<stations" | sort | uniq | sort | perl -pe 's!^.*area_name="(.*) JAPAN.*$!$1!g'`
-  if [ -f "${PLAYLIST_DIR}/RADIKO_${AREA_ID}_${TODOFUKEN}.m3u" ]; then
-    rm "${PLAYLIST_DIR}/RADIKO_${AREA_ID}_${TODOFUKEN}.m3u"
-  fi
-  cat "${TMP_DIR}/JP${AREA}.xml" | grep "<feed>" | sort | uniq | sort | perl -pe 's!^.*/feed/(.*)\.xml.*$!$1!g' | while read STATION ; do echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" >> "${PLAYLIST_DIR}/RADIKO_${AREA_ID}_${TODOFUKEN}.m3u" ; done
+wget -q -O "${TMP_DIR}/JP${AREA}.xml" "http://radiko.jp/v2/station/list/JP${AREA}.xml"
+cat "${TMP_DIR}/JP${AREA}.xml" | grep "<feed>" | sort | uniq | sort | perl -pe 's!^.*/feed/(.*)\.xml.*$!$1!g' | while read STATION ; do echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u" ; done
 
-  AREA=$(($AREA+1))
-done
+while true; do
+  read -p 'Do you want to scan all stations? (for radiko premium users) [y/N]: ' ANSWER
+  case $ANSWER in
+    [yY] | [yY][eE][sS] )
+      AREA=1
+      while [ "${AREA}" -le 47 ]
+      do
+        wget -q -O "${TMP_DIR}/JP${AREA}.xml" "http://radiko.jp/v2/station/list/JP${AREA}.xml"
+        cat "${TMP_DIR}/JP${AREA}.xml" | grep "<feed>" | sort | uniq | sort | perl -pe 's!^.*/feed/(.*)\.xml.*$!$1!g' | while read STATION ; do echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u" ; done
+        AREA=$(($AREA+1))
+      done
+      break;
+      ;;
+    "" | [nN] | [nN][oO] )
+      break;
+      ;;
+    * )
+      echo "Please answer y(yes) or n(no)."
+  esac
+done;
 
-if [ -f "${PLAYLIST_DIR}/RADIKO_TMP.m3u" ]; then
-  cat "${PLAYLIST_DIR}/RADIKO_TMP.m3u" | sort | uniq > "${PLAYLIST_DIR}/RADIKO_ALL.m3u"
-  rm "${PLAYLIST_DIR}/RADIKO_TMP.m3u"
-fi
-
-echo "Run: sudo cp playlists/*.m3u /var/lib/mpd/playlists/"
+echo "Run: cp playlists/*.m3u /var/lib/mpd/playlists/"
+echo "(You may need to use 'sudo')"
 
 exit 0
 
