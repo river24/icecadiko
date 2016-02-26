@@ -22,14 +22,18 @@ do
 
   AREA_ID=$(printf "%02d" $AREA)
   TODOFUKEN=`cat "${TMP_DIR}/JP${AREA}.xml" | grep "<stations" | sort | uniq | sort | perl -pe 's!^.*area_name="(.*) JAPAN.*$!$1!g'`
-  rm "${PLAYLIST_DIR}/RADIKO_${AREA_ID}_${TODOFUKEN}.m3u"
+  if [ -f "${PLAYLIST_DIR}/RADIKO_${AREA_ID}_${TODOFUKEN}.m3u" ]; then
+    rm "${PLAYLIST_DIR}/RADIKO_${AREA_ID}_${TODOFUKEN}.m3u"
+  fi
   cat "${TMP_DIR}/JP${AREA}.xml" | grep "<feed>" | sort | uniq | sort | perl -pe 's!^.*/feed/(.*)\.xml.*$!$1!g' | while read STATION ; do echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" >> "${PLAYLIST_DIR}/RADIKO_${AREA_ID}_${TODOFUKEN}.m3u" ; done
 
   AREA=$(($AREA+1))
 done
 
-cat "${PLAYLIST_DIR}/RADIKO_TMP.m3u" | sort | uniq > "${PLAYLIST_DIR}/RADIKO_ALL.m3u"
-rm "${PLAYLIST_DIR}/RADIKO_TMP.m3u"
+if [ -f "${PLAYLIST_DIR}/RADIKO_TMP.m3u" ]; then
+  cat "${PLAYLIST_DIR}/RADIKO_TMP.m3u" | sort | uniq > "${PLAYLIST_DIR}/RADIKO_ALL.m3u"
+  rm "${PLAYLIST_DIR}/RADIKO_TMP.m3u"
+fi
 
 echo "Run: sudo cp playlists/*.m3u /var/lib/mpd/playlists/"
 
