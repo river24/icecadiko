@@ -59,3 +59,6 @@
 
 ## 停止
 	scripts/stop.bash
+
+## 動作の様子
+![動作の様子](./movie.gif)
