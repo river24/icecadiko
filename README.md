@@ -2,7 +2,7 @@
 
 - radiko のストリームを icecast2 に流し込んで icecast2 / SHOUTcast クライアントで視聴可能にするもの．
 - rtmpdump とか ffmpeg とか vlc とか icecast2 とか sinatra とかの組み合わせ技．
-- MPD (Music Player Daemon) と組み合わせて使うことで MPD クライアントから radiko の聴取・選局が可能になる．
+- MPD (Music Player Daemon) と組み合わせて使うことで MPD クライアントから radiko の選局が可能になる．
 - Raspbian で動作確認．
 
 ## 準備
