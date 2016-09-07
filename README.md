@@ -1,8 +1,7 @@
-# radiko2cast
+# mpdiko
 
-- radiko のストリームを icecast2 に流し込んで icecast2 / SHOUTcast クライアントで視聴可能にするもの．
-- rtmpdump とか ffmpeg とか vlc とか icecast2 とか sinatra とかの組み合わせ技．
-- MPD (Music Player Daemon) と組み合わせて使うことで MPD クライアントから radiko の選局が可能になる．
+- MPD で radiko をライブ試聴するためのツール．
+- MPD のクライアントから radiko の選局も可能．
 - Raspbian で動作確認．
 
 ## 準備
@@ -28,8 +27,8 @@
 	sudo aptitude install mpd
 
 ## インストール
-	git clone https://github.com/river24/radiko2mpd
-	cd radiko2mpd
+	git clone https://github.com/river24/mpdiko
+	cd mpdiko
 	rbenv local 2.2.2
 	rbenv exec bundle install --path vendor/bundle
 
@@ -55,11 +54,8 @@
 ### 自動起動
 	crontab -e
 	----
-	@reboot /path/to/radiko2mpd/scripts/start.bash
+	@reboot /path/to/mpdiko/scripts/start.bash
 	----
 
 ## 停止
 	scripts/stop.bash
-
-## 動作の様子
-![動作の様子](./movie.gif)
