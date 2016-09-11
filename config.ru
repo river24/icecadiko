@@ -159,7 +159,9 @@ get "/:station" do
           if out.closed?
             server.close
             on_air_pid_array.each do |on_air_pid|
-              Process.kill("KILL", on_air_pid.to_i)
+              # Process.kill("KILL", on_air_pid.to_i)
+              kill_command="kill -KILL #{on_air_pid.to_i}"
+              system(kill_command)
             end
             logger.info("Stop: client disconnected")
             break
