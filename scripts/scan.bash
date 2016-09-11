@@ -43,6 +43,17 @@ while true; do
   esac
 done;
 
+# Radiru
+STATION="NHK1" ; echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u"
+STATION="NHK2" ; echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u"
+STATION="NHKFM" ; echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u"
+STATION="NHK1_SENDAI" ; echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u"
+STATION="NHKFM_SENDAI" ; echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u"
+STATION="NHK1_NAGOYA" ; echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u"
+STATION="NHKFM_NAGOYA" ; echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u"
+STATION="NHK1_OSAKA" ; echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u"
+STATION="NHKFM_OSAKA" ; echo "http://${ICECAST2_ADDR}:${APP_PORT}/${STATION}" > "${PLAYLIST_DIR}/${STATION}.m3u"
+
 echo "Run: cp playlists/*.m3u /var/lib/mpd/playlists/"
 echo "(You may need to use 'sudo')"
 

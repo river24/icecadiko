@@ -4,13 +4,15 @@ require 'logger'
 require 'net/http'
 require 'sinatra'
 require 'sinatra/streaming'
+require 'open3'
 
 # icecast2 uri
 icecast2_uri = URI.parse("http://#{ENV['ICECAST2_ADDR']}:#{ENV['ICECAST2_PORT']}#{ENV['ICECAST2_PATH']}")
 
-# radiko command
-radiko_script=::File.dirname(__FILE__) + "/scripts/radiko.bash"
-stop_command="#{radiko_script} stop > /dev/null 2>&1 &"
+# radio command
+radio_script=::File.dirname(__FILE__) + "/scripts/radio.bash"
+stop_command="#{radio_script} stop"
+state_command="#{radio_script} state"
 
 # logger
 AppLogger = ::Logger.new(::File.dirname(__FILE__) + "/log/app.log")
@@ -40,11 +42,14 @@ get "/:station" do
   path << "?" << icecast2_uri.query if icecast2_uri.query
   request_headers = request.env.select { |k, v| k.start_with?('HTTP_') }
 
+  # 停止
   system(stop_command)
-  logger.info("Stop to play")
+  logger.info("Stop: initiation")
 
+  # icecast2停止確認
+  loop_count = 10
   count = 0
-  while count < 10
+  while count < loop_count
     server = nil
     server = Net::BufferedIO.new(TCPSocket.new(icecast2_uri.host, icecast2_uri.port))
 
@@ -54,21 +59,47 @@ get "/:station" do
     proxy_response = Net::HTTPResponse.read_new(server)
     server.close
     if proxy_response.code.to_i == 404
+      logger.info("Icecast2 returns 404")
       break
     end
 
+    logger.info("Waiting for 404 from Icecast2 (loop:#{count})")
     sleep 1
     count = count + 1
   end
 
-  play_command="#{radiko_script} play #{target_station} > /dev/null 2>&1 &"
+  # 再生
+  play_command="#{radio_script} play #{target_station} > /dev/null 2>&1 &"
   system(play_command)
-  logger.info("Start to play #{target_station}")
+  logger.info("Play: channel '#{target_station}'")
+
+  sleep 1
 
   on_air_flag = false
+  on_air_pid_array = []
 
+  loop_count = 10
   count = 0
-  while count < 20
+  while count < loop_count
+    state_output, state_error, state_status = Open3.capture3(state_command)
+    state_output.split("\n").each do |pid|
+      on_air_pid_array.push(pid)
+    end
+
+    if on_air_pid_array.size > 0
+      logger.info("ON AIR PIDs: #{on_air_pid_array}")
+      break
+    end
+
+    logger.info("Waiting for VLC starting")
+    sleep 1
+    count = count + 1
+  end
+
+  # icecast2再生確認
+  loop_count = 10
+  count = 0
+  while count < loop_count
     server = nil
     server = Net::BufferedIO.new(TCPSocket.new(icecast2_uri.host, icecast2_uri.port))
 
@@ -79,14 +110,29 @@ get "/:station" do
     server.close
     if proxy_response.code.to_i == 200
       on_air_flag = true
+      logger.info("Icecast2 returns 200")
       break
     end
 
+    logger.info("Waiting for 200 from Icecast2 (loop:#{count})")
     sleep 1
     count = count + 1
   end
 
-  if on_air_flag
+  if on_air_pid_array.size > 0
+    on_air_continue = false
+
+    state_output, state_error, state_status = Open3.capture3(state_command)
+    state_output.split("\n").each do |pid|
+      if on_air_pid_array.include?(pid)
+        on_air_continue = true
+      end
+    end
+
+    if !on_air_continue
+      break
+    end
+
     server = nil
     server = Net::BufferedIO.new(TCPSocket.new(icecast2_uri.host, icecast2_uri.port))
 
@@ -112,8 +158,10 @@ get "/:station" do
         ensure
           if out.closed?
             server.close
-            system(stop_command)
-            logger.info("Stop to play")
+            on_air_pid_array.each do |on_air_pid|
+              Process.kill("KILL", on_air_pid.to_i)
+            end
+            logger.info("Stop: client disconnected")
             break
           else
             out << block unless out.closed?
@@ -124,7 +172,9 @@ get "/:station" do
         end
       end
     end
-  else
+  end
+
+  if on_air_pid_array.size == 0
     response.status = 404
   end
 end
