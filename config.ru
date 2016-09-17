@@ -35,6 +35,35 @@ helpers do
   end
 end
 
+helpers do
+  def wait_icecast2_status(icecast2_uri,target_status,loop_limit)
+    result = false
+
+    count = 0
+    while count < loop_limit.to_i
+      server = nil
+      server = Net::BufferedIO.new(TCPSocket.new(icecast2_uri.host, icecast2_uri.port))
+
+      server.writeline "GET #{icecast2_uri.path.dup} HTTP/1.0"
+      server.writeline ""
+
+      proxy_response = Net::HTTPResponse.read_new(server)
+      server.close
+      if proxy_response.code.to_i == target_status.to_i
+        logger.debug("Icecast2 returns #{target_status}")
+        result = true
+        break
+      end
+
+      logger.info("Waiting for 404 from Icecast2 (loop:#{count})")
+      sleep 1
+      count = count + 1
+    end
+
+    return result
+  end
+end
+
 get "/:station" do
   target_station = params[:station].to_s
 
@@ -47,40 +76,24 @@ get "/:station" do
   logger.info("Stop: initiation")
 
   # icecast2停止確認
-  loop_count = 10
-  count = 0
-  while count < loop_count
-    server = nil
-    server = Net::BufferedIO.new(TCPSocket.new(icecast2_uri.host, icecast2_uri.port))
-
-    server.writeline "GET #{path} HTTP/1.0"
-    server.writeline ""
-
-    proxy_response = Net::HTTPResponse.read_new(server)
-    server.close
-    if proxy_response.code.to_i == 404
-      logger.info("Icecast2 returns 404")
-      break
-    end
-
-    logger.info("Waiting for 404 from Icecast2 (loop:#{count})")
-    sleep 1
-    count = count + 1
+  if wait_icecast2_status(icecast2_uri,404,10)
+  else
+    system(stop_command)
+    logger.warn("Stop playing because Icecast2 does not return '404' in 10 requests")
+    halt 404
   end
 
   # 再生
   play_command="#{radio_script} play #{target_station} > /dev/null 2>&1 &"
   system(play_command)
   logger.info("Play: channel '#{target_station}'")
-
   sleep 1
 
-  on_air_flag = false
   on_air_pid_array = []
 
-  loop_count = 10
+  loop_limit = 10
   count = 0
-  while count < loop_count
+  while count < loop_limit
     state_output, state_error, state_status = Open3.capture3(state_command)
     state_output.split("\n").each do |pid|
       on_air_pid_array.push(pid)
@@ -96,30 +109,7 @@ get "/:station" do
     count = count + 1
   end
 
-  # icecast2再生確認
-  loop_count = 10
-  count = 0
-  while count < loop_count
-    server = nil
-    server = Net::BufferedIO.new(TCPSocket.new(icecast2_uri.host, icecast2_uri.port))
-
-    server.writeline "GET #{path} HTTP/1.0"
-    server.writeline ""
-
-    proxy_response = Net::HTTPResponse.read_new(server)
-    server.close
-    if proxy_response.code.to_i == 200
-      on_air_flag = true
-      logger.info("Icecast2 returns 200")
-      break
-    end
-
-    logger.info("Waiting for 200 from Icecast2 (loop:#{count})")
-    sleep 1
-    count = count + 1
-  end
-
-  if on_air_pid_array.size > 0
+  if wait_icecast2_status(icecast2_uri,200,10) # icecast2再生確認
     on_air_continue = false
 
     state_output, state_error, state_status = Open3.capture3(state_command)
@@ -174,10 +164,10 @@ get "/:station" do
         end
       end
     end
-  end
-
-  if on_air_pid_array.size == 0
-    response.status = 404
+  else
+    system(stop_command)
+    logger.warn("Stop playing because Icecast2 does not return '200' in 10 requests")
+    halt 404
   end
 end
 
