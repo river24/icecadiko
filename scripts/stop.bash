@@ -7,9 +7,9 @@ SCRIPT_DIR=$(cd $(dirname $0);/bin/pwd)
 PARENT_DIR=$(cd $(dirname $0);cd ..;/bin/pwd)
 
 . "${SCRIPT_DIR}/config.bash"
-# `"${SCRIPT_DIR}/radiko.bash" stop`
 
 cd ${APP_ROOT}
 
+${SCRIPT_DIR}/radio.bash stop
 ${RBENV_ROOT}/shims/bundle exec thin stop -P ${PID_FILE}
 
