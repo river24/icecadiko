@@ -18,7 +18,7 @@ PID=$$
 LOGIN_URL="https://radiko.jp/ap/member/login/login"
 CHECK_URL="https://radiko.jp/ap/member/webapi/member/login/check"
 LOGOUT_URL="https://radiko.jp/ap/member/webapi/member/logout"
-PLAYER_URL="http://radiko.jp/player/swf/player_4.1.0.00.swf"
+PLAYER_URL="http://radiko.jp/apps/js/flash/myplayer-release.swf"
 AUTH1_URL="https://radiko.jp/v2/api/auth1_fms"
 AUTH2_URL="https://radiko.jp/v2/api/auth2_fms"
 CHANNEL_URL_PREFIX="http://radiko.jp/v2/station/stream/"
@@ -280,7 +280,7 @@ if [[ "${MODE}" =~ ^play$ ]]; then
       fi
 
       if [ ! -f ${KEY_FILE} ]; then
-        swfextract -b 14 ${PLAYER_FILE} -o ${KEY_FILE}
+        swfextract -b 12 ${PLAYER_FILE} -o ${KEY_FILE}
 
         if [ ! -f ${KEY_FILE} ]; then
           echo "Failed to Get Key Data"
@@ -297,8 +297,8 @@ if [[ "${MODE}" =~ ^play$ ]]; then
 
       wget -q \
            --header="pragma: no-cache" \
-           --header="X-Radiko-App: pc_1" \
-           --header="X-Radiko-App-Version: 2.0.1" \
+           --header="X-Radiko-App: pc_ts" \
+           --header="X-Radiko-App-Version: 4.0.0" \
            --header="X-Radiko-User: test-stream" \
            --header="X-Radiko-Device: pc" \
            --post-data='\r\n' \
@@ -333,8 +333,8 @@ if [[ "${MODE}" =~ ^play$ ]]; then
 
       wget -q \
            --header="pragma: no-cache" \
-           --header="X-Radiko-App: pc_1" \
-           --header="X-Radiko-App-Version: 2.0.1" \
+           --header="X-Radiko-App: pc_ts" \
+           --header="X-Radiko-App-Version: 4.0.0" \
            --header="X-Radiko-User: test-stream" \
            --header="X-Radiko-Device: pc" \
            --header="X-Radiko-Authtoken: ${authtoken}" \
