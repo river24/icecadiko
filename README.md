@@ -1,8 +1,10 @@
-# mpdiko
+# icecadiko
 
-- MPD で radiko をライブ試聴するためのツール．
-- MPD のクライアントから radiko の選局も可能．
-- Raspbian で動作確認．
+- radikoをicecast2経由で視聴するためのツール．
+- icecast2対応の各種クライアントでradikoを視聴可能に．
+- icecast2のURLを切り替えることで，radikoの選局も可能．
+- radikoのプレミアムにも対応．
+- Raspbianで動作確認．
 
 ## 準備
 
@@ -24,11 +26,10 @@
 	sudo aptitude install ffmpeg lame
 	sudo aptitude install vlc-nox
 	sudo aptitude install icecast2
-	sudo aptitude install mpd
 
 ## インストール
-	git clone https://github.com/river24/mpdiko
-	cd mpdiko
+	git clone https://github.com/river24/icecadiko
+	cd icecadiko
 	rbenv local 2.2.2
 	rbenv exec bundle install --path vendor/bundle
 
@@ -37,19 +38,16 @@
 	vi scripts/config.bash
 
 - radiko のプレミアムユーザは 'RADIKO_MAIL' と 'RADIKO_PASS' を設定することで，エリアフリーでの聴取が可能になる．
+- 'APP_PORT'はデフォルトで9000番．他のアプリケーションと重なる場合は適宜変更．
 
 ## 放送局スキャン
 	scripts/scan.bash
 
 ## プレイリストのコピー
-	sudo cp playlists/*.m3u /var/lib/mpd/playlists/
+	sudo rsync -av playlists/icecadiko /path/to/playlist/folder/of/your/icecast2/client/
 
 ## 起動
 	scripts/start.bash
-
-### MPDで選局
-- MPD の "Saved playlist" から聴きたい放送局を選局します．
-- 認証等の都合で，10秒前後かかります．
 
 ### 自動起動
 	crontab -e
@@ -59,3 +57,12 @@
 
 ## 停止
 	scripts/stop.bash
+
+## 視聴・選局
+icecast2対応のクライアントで，プレイリストを選んで再生．
+
+### Music Player Daemonでの選局の様子
+- 「プレイリストのコピー」のコピー先として，Music Player Daemonのプレイリストディレクトリを指定して，コピー．
+- Music Player Daemonの"Saved playlist"から聴きたい放送局を選局．
+- 認証等の都合で，選局に10秒前後かかることがある．
+
